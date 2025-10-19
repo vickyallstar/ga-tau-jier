@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Register Firebase</title>
+  <script type="module">
+    // --- Firebase Config (ganti dengan punyamu dari console Firebase) ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MSG_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- Register Function ---
+    async function registerUser() {
+      const email = document.getElementById("reg-email").value;
+      const password = document.getElementById("reg-password").value;
+      const username = document.getElementById("reg-username").value;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await setDoc(doc(db, "users", user.uid), {
+          username: username,
+          email: email,
+          createdAt: new Date()
+        });
+        alert("Akun berhasil dibuat!");
+      } catch (error) {
+        alert("Gagal register: " + error.message);
+      }
+    }
+
+    // --- Login Function ---
+    async function loginUser() {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        alert("Login berhasil! Selamat datang: " + user.email);
+      } catch (error) {
+        alert("Login gagal: " + error.message);
+      }
+    }
+
+    window.registerUser = registerUser;
+    window.loginUser = loginUser;
+  </script>
+</head>
+<body style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+  <h2>🔥 Register Akun</h2>
+  <input type="text" id="reg-username" placeholder="Username"><br><br>
+  <input type="email" id="reg-email" placeholder="Email"><br><br>
+  <input type="password" id="reg-password" placeholder="Password"><br><br>
+  <button onclick="registerUser()">Daftar</button>
+
+  <hr style="margin: 40px 0;">
+
+  <h2>🔑 Login</h2>
+  <input type="email" id="login-email" placeholder="Email"><br><br>
+  <input type="password" id="login-password" placeholder="Password"><br><br>
+  <button onclick="loginUser()">Login</button>
+</body>
+</html>
